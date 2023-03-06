@@ -1,0 +1,63 @@
+#title {
+  text-align: center;
+  font-size: large;
+}
+
+/* Center the search container horizontally */
+#search-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  position: relative;
+}
+
+/* Center the button container horizontally */
+#button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Style the search input container */
+#search-container {
+  position: relative;
+}
+
+/* Style the search input */
+#search-input {
+  padding: 12px 12px 12px 40px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  width: 500px;
+}
+
+/* Style the search icon container */
+.search-icon-container {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Style the search icon */
+.search-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+/* Style the search button */
+#search-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  background-color: #4c96af;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+/* Add hover effect to the search button */
+#search-button:hover {
+  background-color: #3e8e41;
+}
