@@ -1,7 +1,9 @@
 $(document).ready(function() {
     $("#search-form").submit(function() {
         // Get the search query from the input field
-        var query = $("#search-bar").val();
+        var query = $("#search-input").val();
+
+        console.log(query)
 
         // Make an API request to get search results
         $.ajax({
