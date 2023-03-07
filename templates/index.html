@@ -22,10 +22,10 @@
     </form>
 
     {% if query %}
-      <h2 style="text-align:left; margin-left: 5%;">Google Search</h4>
-      <div id="result-container">
+      <h2 style="text-align:left; margin-left: 5%;">Google Search</h2>
+      <div class="result-container">
         <ul class="search-results">
-        {% for result in results %}
+        {% for result in google_results %}
             <li class="search-result">
                 <a href="{{ result.link }}">{{ result.title }}</a>
                 <p>{{ result.snippet }}</p>
@@ -33,7 +33,17 @@
         {% endfor %}
         </ul>
       </div>
-    </div>
+      <h2 style="text-align:left; margin-top:2%; margin-left: 5%;">Bing Search</h2>
+        <div class="result-container">
+          <ul class="search-results">
+          {% for result in bing_results %}
+              <li class="search-result">
+                  <a href="{{ result.url }}">{{ result.name }}</a>
+                  <p>{{ result.text }}</p>
+              </li>
+          {% endfor %}
+          </ul>
+        </div>
     {% endif %}
 
 

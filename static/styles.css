@@ -9,7 +9,7 @@ html, body {
     margin: 0;
   }
 
-#result-container {
+.result-container {
   display: flex;
   flex-direction: column;
   align-items: center;
