@@ -4,24 +4,40 @@
     <title>Search Bar</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
     <script async src="https://cse.google.com/cse.js?cx=746b90334649d4be8"></script>
-</head>
+    <script src="https://kit.fontawesome.com/bb692ce394.js" crossorigin="anonymous"></script>
+  </head>
   <body>
     <div id="title">
         <h1>American Football Search</h1>
     </div>
-
-    <form id="search-form">
+    <form method="post">
         <div id="search-container">
             <span class="search-icon"></span>
-            <input type="text" id="search-input">
-        </div>
+            <input type="text" name="query" id="search-input">
+            <i class="fa fa-football" aria-hidden="true"></i>
+          </div>
         <div id="button-container">
-            <button type="button" id="search-button">Submit</button>
+            <button type="submit" id="search-button">Submit</button>
         </div>
     </form>
 
+    {% if query %}
+      <h2 style="text-align:left; margin-left: 5%;">Google Search</h4>
+      <div id="result-container">
+        <ul class="search-results">
+        {% for result in results %}
+            <li class="search-result">
+                <a href="{{ result.link }}">{{ result.title }}</a>
+                <p>{{ result.snippet }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+
     <!-- Create a container for displaying search results -->
-    <div class="search-results"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
     <script type="text/javascript" src="{{url_for('static', filename='config.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='script.js')}}"></script>
