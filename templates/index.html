@@ -15,10 +15,56 @@
             <span class="search-icon"></span>
             <input type="text" name="query" id="search-input">
             <i class="fa fa-football" aria-hidden="true"></i>
-          </div>
-        <div id="button-container">
-            <button type="submit" id="search-button">Submit</button>
         </div>
+        
+        <div id="button-container">
+          <button type="submit" id="search-button">Submit</button>
+        </div>
+
+        <div class="football-form-grid">
+          <fieldset>
+            <label>
+              Select Relevance Models
+              <input type="radio" id="vector-space" name="relevance-models" value="vector-space">
+              <label for="vector-space">Vector Space</label>
+              <input type="radio" id="page-rank" name="relevance-models" value="page-rank">
+              <label for="page-rank">Page Rank</label>
+              <input type="radio" id="hits" name="relevance-models" value="hits">
+              <label for="hits">HITS</label>
+            </label>
+          </fieldset>
+        <!-- <div style="margin-top: 2%; margin-bottom: 2%;">
+          <label for="clustering-toggle">Apply Clustering</label>
+          <input type="checkbox" id="clustering-toggle">
+        </div> -->
+
+        <fieldset id="clustering-container">
+          <label>
+            Select Type of Clustering
+            <input type="radio" id="flat-clustering" name="clustering" value="flat-clustering">
+            <label for="flat-clustering">Flat Clustering</label>
+            <input type="radio" id="hierarchical-clustering" name="clustering" value="hierarchical-clustering">
+            <label for="hierarchical-clustering">Hierarchical Clustering</label>
+          </label>
+        </fieldset>
+        
+        <!-- <div style="margin-top: 2%; margin-bottom: 2%;">
+          <label for="query-toggle">Apply Query Expansion</label>
+          <input type="checkbox" id="query-toggle">
+        </div> -->
+
+        <fieldset id="query-expansion-container">
+          <label>
+            Select Type of Query Expansion
+            <input type="radio" id="association-expansion" name="query-expansion" value="association-expansion">
+            <label for="association-expansion">Association Expansion</label>
+            <input type="radio" id="metric-expansion" name="query-expansion" value="metric-expansion">
+            <label for="metric-expansion">Metric Expansion</label>
+            <input type="radio" id="scalar-expansion" name="query-expansion" value="scalar-expansion">
+            <label for="scalar-expansion">Scalar Expansion</label>
+          </label>
+        </fieldset>
+      </div>
     </form>
 
     <div class="iframe-result-container">
@@ -39,7 +85,7 @@
     </div>
     <div class="result-container">
       <div class="search-results-container" style="display:none">
-        <h2 style="text-align:left;">Google Search</h2>
+        <h2 style="text-align:left; margin-left:1%">Google Search</h2>
         <ul class="search-results">
           {% for result in google_results %}
             <li class="search-result">
@@ -48,7 +94,7 @@
             </li>
           {% endfor %}
         </ul>
-        <h2 style="text-align:left; margin-top:2%;">Bing Search</h2>
+        <h2 style="text-align:left; margin-left:1%; margin-top:2%;">Bing Search</h2>
         <ul class="search-results">
           {% for result in bing_results %}
             <li class="search-result">
