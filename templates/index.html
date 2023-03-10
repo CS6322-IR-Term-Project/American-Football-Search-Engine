@@ -21,35 +21,50 @@
         </div>
     </form>
 
+    <div class="iframe-result-container">
+      <div class="iframe-container">
+        <h2 class="google">Google Search</h2>
+        <iframe src="https://www.google.com/search?igu=1&ei=&q={{query}}" width="960" height="540" frameborder="1"></iframe>
+      </div>
+
+      <div class="iframe-container">
+        <h2 class="bing">Bing Search</h2>
+        <iframe src="https://www.bing.com/search?q={{query}}" width="960" height="540" frameborder="1"></iframe>
+      </div>
+    </div>
+
     {% if query %}
-      <h2 style="text-align:left; margin-left: 5%;">Google Search</h2>
-      <div class="result-container">
+    <div class="advanced-details-container">
+      <button class="advanced-details-button">Show Advanced Search Results</button>
+    </div>
+    <div class="result-container">
+      <div class="search-results-container" style="display:none">
+        <h2 style="text-align:left;">Google Search</h2>
         <ul class="search-results">
-        {% for result in google_results %}
+          {% for result in google_results %}
             <li class="search-result">
-                <a href="{{ result.link }}">{{ result.title }}</a>
-                <p>{{ result.snippet }}</p>
+              <a href="{{ result.link }}">{{ result.title }}</a>
+              <p>{{ result.snippet }}</p>
             </li>
-        {% endfor %}
+          {% endfor %}
+        </ul>
+        <h2 style="text-align:left; margin-top:2%;">Bing Search</h2>
+        <ul class="search-results">
+          {% for result in bing_results %}
+            <li class="search-result">
+              <a href="{{ result.url }}">{{ result.name }}</a>
+              <p>{{ result.text }}</p>
+            </li>
+          {% endfor %}
         </ul>
       </div>
-      <h2 style="text-align:left; margin-top:2%; margin-left: 5%;">Bing Search</h2>
-        <div class="result-container">
-          <ul class="search-results">
-          {% for result in bing_results %}
-              <li class="search-result">
-                  <a href="{{ result.url }}">{{ result.name }}</a>
-                  <p>{{ result.text }}</p>
-              </li>
-          {% endfor %}
-          </ul>
-        </div>
+  </div>
+    
     {% endif %}
 
 
     <!-- Create a container for displaying search results -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
-    <script type="text/javascript" src="{{url_for('static', filename='config.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='script.js')}}"></script>
   </body>
 </html>
