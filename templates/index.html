@@ -33,10 +33,6 @@
               <label for="hits">HITS</label>
             </label>
           </fieldset>
-        <!-- <div style="margin-top: 2%; margin-bottom: 2%;">
-          <label for="clustering-toggle">Apply Clustering</label>
-          <input type="checkbox" id="clustering-toggle">
-        </div> -->
 
         <fieldset id="clustering-container">
           <label>
@@ -48,11 +44,6 @@
           </label>
         </fieldset>
         
-        <!-- <div style="margin-top: 2%; margin-bottom: 2%;">
-          <label for="query-toggle">Apply Query Expansion</label>
-          <input type="checkbox" id="query-toggle">
-        </div> -->
-
         <fieldset id="query-expansion-container">
           <label>
             Select Type of Query Expansion
@@ -67,6 +58,41 @@
       </div>
     </form>
 
+
+    {% if query %}
+    <div class="iframe-result-container">
+      <div class="iframe-container">
+      <h2 class="google">Custom Search</h2>
+      <iframe class="search-results-frame" srcdoc='
+        <html>
+          <head>
+            <link rel="stylesheet" href="../static/styles.css">
+          </head>
+          <body>
+              <div class="result-container">
+                {% if custom_results %}
+                  <div class="search-results-container">
+                    <ul class="search-results">
+                      {% for result in custom_results %}
+                        <li class="search-result">
+                          <a href="{{ result.id }}">{{ result.title[0] }}</a>
+                          <p>{{ result.content[0] }}</p>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+              </div>
+          </body>
+        </html>'
+        width="960" height="540" frameborder="1"
+      >
+      </iframe>
+    </div>
+  </div>
+  {% endif %}
+  
+
     <div class="iframe-result-container">
       <div class="iframe-container">
         <h2 class="google">Google Search</h2>
@@ -78,36 +104,6 @@
         <iframe src="https://www.bing.com/search?q={{query}}" width="960" height="540" frameborder="1"></iframe>
       </div>
     </div>
-
-    {% if query %}
-    <div class="advanced-details-container">
-      <button class="advanced-details-button">Show Advanced Search Results</button>
-    </div>
-    <div class="result-container">
-      <div class="search-results-container" style="display:none">
-        <h2 style="text-align:left; margin-left:1%">Google Search</h2>
-        <ul class="search-results">
-          {% for result in google_results %}
-            <li class="search-result">
-              <a href="{{ result.link }}">{{ result.title }}</a>
-              <p>{{ result.snippet }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-        <h2 style="text-align:left; margin-left:1%; margin-top:2%;">Bing Search</h2>
-        <ul class="search-results">
-          {% for result in bing_results %}
-            <li class="search-result">
-              <a href="{{ result.url }}">{{ result.name }}</a>
-              <p>{{ result.text }}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-  </div>
-    
-    {% endif %}
-
 
     <!-- Create a container for displaying search results -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  

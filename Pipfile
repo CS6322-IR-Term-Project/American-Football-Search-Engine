@@ -8,6 +8,7 @@ flask = "*"
 google-api-python-client = "*"
 beautifulsoup4 = "*"
 requests = "*"
+pysolr = "*"
 
 [dev-packages]
 
