@@ -215,22 +215,21 @@ def metric_cluster_main(query, solr_results):
 
     clusters = list()
 
-    print(metric_clusters2)
-
     for cluster in metric_clusters2:
         if type(cluster) == Element:
             clusters.append((cluster.v, cluster.value))
 
-    print(clusters)
-
     metric_clusters2 = sorted(clusters, key=lambda x: x[1], reverse=True)
 
-    i=0
-    
-    while i < 3:
+    print(metric_clusters2)
+
+    i = 0
+
+    while i < 1 and i < len(metric_clusters2):
         query += ' '+ str(metric_clusters2[i][0])
         i+=1
 
+    
     print("new query: ", query)    
     return query
     

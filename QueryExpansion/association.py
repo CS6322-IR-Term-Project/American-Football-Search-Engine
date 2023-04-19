@@ -53,7 +53,7 @@ def make_stem_map(vocab):
     return token_2_stem, stem_2_tokens 
 
 
-def build_association(doc_tokens, token_2_stem, stem_2_tokens, query, num_expansions=10):
+def build_association(doc_tokens, token_2_stem, stem_2_tokens, query, num_expansions=1):
     """
     Args:
         doc_tokens(2-D list): tokens in each documents having structure:
@@ -170,24 +170,8 @@ def association_main(query, solr_results):
 
     # update query with query expands 
     expanded_query = list()
-    calc_query_list = list(query_expands)
-    query_index = 0
-    query_expands_index = 0
-
-    while query_expands_index < len(calc_query_list) and query_index < len(query):
-        expanded_query.append(query[query_index])
-        expanded_query.append(calc_query_list[query_expands_index])
-        query_index += 1
-        query_expands_index += 1
-    
-    while query_expands_index < len(calc_query_list):
-        expanded_query.append(calc_query_list[query_expands_index])
-        query_expands_index += 1
-
-    while query_index < len(query):
-        expanded_query.append(query[query_index])
-        query_index += 1
-
+    expanded_query.extend(query)
+    expanded_query.extend(list(query_expands))
     query = expanded_query
 
     query = ' '.join(query)

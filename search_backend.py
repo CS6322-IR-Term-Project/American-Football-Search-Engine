@@ -62,8 +62,6 @@ def apply_spell_check(query):
     return ' '.join(corrections.get(word, word) for word in words)
 
 def query_expansion(query, custom_results, selection):
-    query = apply_spell_check(query)
-    
     if selection == 'association-expansion':
         expanded_query = association_main(query, custom_results)
         custom_results = custom_search(expanded_query)
@@ -76,7 +74,9 @@ def query_expansion(query, custom_results, selection):
     return custom_results
 
 
+
 def create_doc(result):
+
     doc = {
         'id': result.get('id'),
         'title': result.get('title'),
@@ -102,10 +102,19 @@ def custom_search(query):
     return custom_results
 
 def query_search(query):
-    results = solr.search('text:' + query, **{
+    updated_query = f"\"{query}\""
+
+    results = solr.search('text:' + updated_query, **{
         'fl': 'id, title, url, anchor, content, meta_info, digest',  # Select the fields to return
-        'rows': 50
+        'rows': 100
     })
+
+    if len(results) == 0:
+        results = solr.search('text:' + query, **{
+            'fl': 'id, title, url, anchor, content, meta_info, digest',  # Select the fields to return
+            'rows': 25
+        })
+
 
     docs = [create_doc(result) for result in results.docs]
     return docs
