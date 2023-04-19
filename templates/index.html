@@ -8,7 +8,7 @@
   </head>
   <body>
     <div id="title">
-        <h1>American Football Search</h1>
+        <h1>American Football Search Engine</h1>
     </div>
     <form method="post">
         <div id="search-container">
@@ -24,37 +24,35 @@
         <div class="football-form-grid">
           <fieldset>
             <label>
-              Select Relevance Models
-              <input type="radio" id="vector-space" name="relevance-models" value="vector-space">
-              <label for="vector-space">Vector Space</label>
-              <input type="radio" id="page-rank" name="relevance-models" value="page-rank">
+              Relevance Models
+              <input type="radio" id="page-rank" name="selection" value="page-rank" checked="checked">
               <label for="page-rank">Page Rank</label>
-              <input type="radio" id="hits" name="relevance-models" value="hits">
+              <input type="radio" id="hits" name="selection" value="hits">
               <label for="hits">HITS</label>
             </label>
           </fieldset>
-
-        <fieldset id="clustering-container">
-          <label>
-            Select Type of Clustering
-            <input type="radio" id="flat-clustering" name="clustering" value="flat-clustering">
-            <label for="flat-clustering">Flat Clustering</label>
-            <input type="radio" id="hierarchical-clustering" name="clustering" value="hierarchical-clustering">
-            <label for="hierarchical-clustering">Hierarchical Clustering</label>
-          </label>
-        </fieldset>
+          
+          <fieldset id="clustering-container">
+            <label>
+              Clustering
+              <input type="radio" id="flat-clustering" name="selection" value="flat-clustering">
+              <label for="flat-clustering">Flat Clustering</label>
+              <input type="radio" id="hierarchical-clustering" name="selection" value="hierarchical-clustering">
+              <label for="hierarchical-clustering">Hierarchical Clustering</label>
+            </label>
+          </fieldset>
         
-        <fieldset id="query-expansion-container">
-          <label>
-            Select Type of Query Expansion
-            <input type="radio" id="association-expansion" name="query-expansion" value="association-expansion">
-            <label for="association-expansion">Association Expansion</label>
-            <input type="radio" id="metric-expansion" name="query-expansion" value="metric-expansion">
-            <label for="metric-expansion">Metric Expansion</label>
-            <input type="radio" id="scalar-expansion" name="query-expansion" value="scalar-expansion">
-            <label for="scalar-expansion">Scalar Expansion</label>
-          </label>
-        </fieldset>
+          <fieldset id="query-expansion-container">
+            <label>
+              Query Expansion
+              <input type="radio" id="association-expansion" name="selection" value="association-expansion">
+              <label for="association-expansion">Association Expansion</label>
+              <input type="radio" id="metric-expansion" name="selection" value="metric-expansion">
+              <label for="metric-expansion">Metric Expansion</label>
+              <input type="radio" id="scalar-expansion" name="selection" value="scalar-expansion">
+             <label for="scalar-expansion">Scalar Expansion</label>
+             </label>
+          </fieldset>
       </div>
     </form>
 

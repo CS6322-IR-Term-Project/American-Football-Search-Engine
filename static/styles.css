@@ -224,15 +224,16 @@ input[type="radio"]:checked + label:before {
 }
 
 .football-form-grid {
-  display: flex;
+  display:flex;
   flex-direction:row;
-  justify-content: space-evenly;
+  justify-content:space-evenly;
   flex-wrap: wrap;
   margin-top: 1%;
-  position: relative;
+  position:relative;
 }
 
 fieldset {
+  justify-content:space-between;
   margin-top:1%;
   margin-bottom:1%;
 }
@@ -255,4 +256,16 @@ fieldset {
   justify-content: center;
   align-items: center;
   overflow:scroll;
+}
+
+.football-form-grid fieldset {
+  margin-bottom: 10px;
+}
+
+.football-form-grid fieldset div {
+  margin-bottom: 5px;
+}
+
+.football-form-grid label {
+  margin-left: 5px;
 }

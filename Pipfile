@@ -9,6 +9,13 @@ google-api-python-client = "*"
 beautifulsoup4 = "*"
 requests = "*"
 pysolr = "*"
+flask-cors = "*"
+networkx = "*"
+numpy = "*"
+scipy = "*"
+tqdm = "*"
+nltk = "*"
+pyspellchecker = "*"
 
 [dev-packages]
 
