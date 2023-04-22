@@ -171,7 +171,9 @@ def get_metric_clusters(tokens_map, stem_map, query):
     # pass
 
 def metric_cluster_main(query, solr_results):
+    custom_stop_words = ['button', 'bar', 'app', 'account', 'shop', 'main', 'about', 'skip', 'watch', 'link', 'file', 'upload', 'ref', 'edit', 'content', 'html', 'head', 'body', 'href', 'src', 'alt', 'header', 'footer', 'nav', 'menu', 'search', 'com']
     stop_words = set(stopwords.words('english'))
+    stop_words.update(custom_stop_words)
     # query = 'olympic medal'
     # path = 
 #    solr = pysolr.Solr('http://localhost:8983/solr/nutch/', always_commit=True, timeout=10)
@@ -197,7 +199,7 @@ def metric_cluster_main(query, solr_results):
                 tokens_this_document.append(item)
 
         #tokens_this_document = tokenize_doc(result['content'][0], stop_words)
-        print(type(tokens_this_document))
+        
         token_counts = collections.Counter(tokens_this_document)
         for token in tokens_this_document:
             if token not in tokens_map:
@@ -221,11 +223,9 @@ def metric_cluster_main(query, solr_results):
 
     metric_clusters2 = sorted(clusters, key=lambda x: x[1], reverse=True)
 
-    print(metric_clusters2)
-
     i = 0
 
-    while i < 1 and i < len(metric_clusters2):
+    while i < 5 and i < len(metric_clusters2):
         query += ' '+ str(metric_clusters2[i][0])
         i+=1
 

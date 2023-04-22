@@ -1,12 +1,16 @@
 from flask import Flask, render_template, url_for, request
 from googleapiclient.discovery import build
 from bs4 import BeautifulSoup
+from nltk import WordNetLemmatizer
+import string
 from flask_cors import CORS
 from QueryExpansion.association import association_main
 from QueryExpansion.metric import metric_cluster_main
 import os, requests, json, re, html
 from spellchecker import SpellChecker
 from operator import itemgetter
+from nltk.corpus import stopwords
+from nltk.tokenize import wordpunct_tokenize
 import pysolr
 
 app = Flask(__name__)
@@ -102,22 +106,27 @@ def custom_search(query):
     return custom_results
 
 def query_search(query):
-    updated_query = f"\"{query}\""
+    updated_query = ' '.join(tokenizer(query))
+    results = None
 
-    results = solr.search('text:' + updated_query, **{
-        'fl': 'id, title, url, anchor, content, meta_info, digest',  # Select the fields to return
-        'rows': 100
-    })
-
-    if len(results) == 0:
-        results = solr.search('text:' + query, **{
+    while (results is None or len(results) == 0):
+        results = solr.search('text:' + f"\"{updated_query}\"", **{
             'fl': 'id, title, url, anchor, content, meta_info, digest',  # Select the fields to return
-            'rows': 25
+            'rows': 100
         })
 
+        updated_query = slice_from_back(updated_query)
+        print(updated_query)
 
     docs = [create_doc(result) for result in results.docs]
     return docs
+
+def slice_from_back(s):
+    print("s == ", s)
+    words = s.split()  # split the input string into words
+    if len(words) > 0:
+        words.pop()  # remove the last word
+    return ' '.join(words)  # join the remaining words together with spaces and return the resulting string
 
 
 def get_hits_results(clust_inp):
@@ -128,6 +137,24 @@ def get_hits_results(clust_inp):
 
     return clust_inp
 
+def tokenizer(query):
+    # remove stop words
+    english_stopwords = stopwords.words("english")
+
+    # tokenize extracted_text
+    formatted_text = wordpunct_tokenize(query)
+
+    # remove stop words
+    stop_words_removed = [token for token in formatted_text if token not in english_stopwords]
+
+    # remove punctuation
+    punctuation_removed = [token for token in stop_words_removed if token not in string.punctuation]
+
+    # lemmatize
+    lemmatizer = WordNetLemmatizer()
+    tokens = [lemmatizer.lemmatize(token) for token in punctuation_removed]
+
+    return tokens
 
 def get_clustering_results(custom_results, user_selection):
     if user_selection == 'flat-clustering':

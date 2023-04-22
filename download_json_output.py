@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://localhost:8983/solr/nutch/select?q=*:*&wt=json&rows=10000000"
+url = "http://localhost:8983/solr/nutch/select?q=*:*&wt=json&rows=50000"
 response = requests.get(url)
 data = response.json()
 

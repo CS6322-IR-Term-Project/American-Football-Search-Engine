@@ -1,180 +1,94 @@
-import re
-
-import numpy as np
 from nltk.corpus import stopwords
-from nltk import PorterStemmer
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import pysolr
-import json
+from nltk.tokenize import wordpunct_tokenize
+from nltk import WordNetLemmatizer
 from tqdm import tqdm
+import string
 from collections import defaultdict, Counter
-import heapq
 
-porter_stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-
-def tokenize_text(text):
-    # remove enters
-    text = text.replace('\n', ' ')
-    # convert to lowercase
-    text = text.lower()
-    # tokenize text
-    tokens = word_tokenize(text)
-    # remove punctuation and numbers
-    tokens = [token for token in tokens if token.isalpha()]
+def tokenizer(query):
     # remove stop words
-    stop_words = set(stopwords.words('english'))
-    tokens = [token for token in tokens if token not in stop_words]
-    
+    english_stopwords = stopwords.words("english")
+
+    # tokenize extracted_text
+    formatted_text = wordpunct_tokenize(query)
+
+    # remove stop words
+    stop_words_removed = [token for token in formatted_text if token not in english_stopwords]
+
+    # remove punctuation
+    punctuation_removed = [token for token in stop_words_removed if token not in string.punctuation]
+
+    # lemmatize
+    lemmatizer = WordNetLemmatizer()
+    tokens = [lemmatizer.lemmatize(token) for token in punctuation_removed]
+
     return tokens
-
-def make_stem_map(vocab):
-    """
-    Args:
-        vocab(list): a list of vocabulary
-
-    Returns:
-        token_2_stem(dict): a map from token to its stem having structure {token:stem}
-        stem_2_tokens(dict): a map from stem to its corresponding tokens having structure:
-                             {stem:set(token_1, token_2, ...)}
-    """
-    token_2_stem = {} # 1 to 1
-    stem_2_tokens = {} # 1 to n
-
-    for token in vocab:
-        stem = porter_stemmer.stem(token)
-        if stem not in stem_2_tokens:
-            stem_2_tokens[stem] = set()
-        stem_2_tokens[stem].add(token)
-        token_2_stem[token] = stem
-
-    return token_2_stem, stem_2_tokens 
-
-
-def build_association(doc_tokens, token_2_stem, stem_2_tokens, query, num_expansions=1):
-    """
-    Args:
-        doc_tokens(2-D list): tokens in each documents having structure:
-                              [[token_1, token_2, ...], [...], ...]
-        token_2_stem(dict): a map from token to its stem having structure {token:stem}
-        stem_2_tokens(dict): a map from stem to its corresponding tokens having structure:
-                             {stem:set(token_1, token_2, ...)}
-        query(list): a list of tokens from query
-        num_expansions(int): the number of expansion tokens to return for each query token
-        
-    Return:
-        query_expands(list): list of expand stem tokens ids for each token in the query
-    """
-    # build map from stem to index
-    stems = sorted(stem_2_tokens.keys())
-    stem_2_idx = {s: i for i, s in enumerate(stems)}
-
-    # frequency of stems in each document
-    f = np.zeros((len(doc_tokens), len(stems)), dtype=np.int64)
-    for doc_id, tokens in enumerate(doc_tokens):
-        stems_in_doc = set(token_2_stem.get(t, t) for t in tokens)
-        stem_counts = Counter(stems_in_doc)
-        for stem, count in stem_counts.items():
-            f[doc_id, stem_2_idx[stem]] = count
-
-    # correlation matrix
-    c = np.dot(f.T, f)
-
-    # normalize correlation matrix and pick the top expansion tokens
-    query_expands_id = []
-    for token in query:
-        stem = token_2_stem.get(token, token)
-        stem_id = stem_2_idx.get(stem)
-        if stem_id is None:
-            continue
-
-        # normalize correlation matrix for the query token
-        c_token = c[stem_id, :]
-        norm = np.linalg.norm(c_token)
-        if norm == 0:
-            continue
-        s_token = c_token / norm
-
-        # pick the top expansion stems for each query token
-        idx_sort = heapq.nlargest(num_expansions + 1, range(len(s_token)), key=s_token.__getitem__)
-        if stem_id in idx_sort:
-            idx_sort.remove(stem_id)  # remove the original stem from the list of expansions
-        else:
-            idx_sort.pop()  # remove the last expansion stem to keep only num_expansions stems
-        query_expands_id.extend(idx_sort)
-
-    # convert stem ids to stem
-    query_expands = [stems[stem_idx] for stem_idx in query_expands_id]
-
-    return query_expands
                           
+def extract_cooccurring_terms(tfidf_matrix, feature_names, query_tokens):
+    # Extract co-occurring terms
+    cooccurring_terms = Counter()
+    for doc_index in range(tfidf_matrix.shape[0]):
+        for term_index in tfidf_matrix[doc_index].nonzero()[1]:
+            term = feature_names[term_index]
 
+            if term in query_tokens:
+                row = tfidf_matrix[doc_index].tocoo()
+                cooccurring_terms.update([feature_names[i] for i in row.col if i != term_index])
+
+    return cooccurring_terms
 
 
 def association_main(query, solr_results):
-    """
-    Args:
-        query(str): a text string of query
-        solr_results(list): result for the query from function 'get_results_from_solr'
+    query_token = tokenizer(query)
+    documents_processed = []
 
-    Return:
-        query(str): a text string of expanded query
-    """
-    # query = 'olympic medal'
-    # solr = pysolr.Solr('http://localhost:8983/solr/nutch/', always_commit=True, timeout=10)
-    # results = get_results_from_solr(query, solr)
-    vocab = set()
-    doc_tokens = []
-
-    # tokenize query and query results, then build vocabulary
-    query_text = query # keep original query text
-
-    print("query text ==", query_text)
-
-    if 'content:' == query[:8]:
-        query = query[8:]
-    print("Initial Query ", query)
-    query = tokenize_text(query)
-    vocab.update(query)
-
-    for result in tqdm(solr_results, desc='Preprocessing results'):
-        if 'content' not in result:
-            tokens = set()
-        else:
-            tokens = set()
-
-            for token in result['content']:
-                tokens.update(tokenize_text(token))
-
-        doc_tokens.append(tokens)
-        vocab.update(tokens)
-
-        print(vocab)
-
-    vocab = list(sorted(vocab))
-    token_2_stem, stem_2_tokens = make_stem_map(vocab)
-
-    # expand query
-    query_expands_stem = build_association(doc_tokens, token_2_stem, stem_2_tokens, query)
+    for result in solr_results:
+        document = result['content'][0]
+        document_tokens = tokenizer(document)
+        doc_str = ' '.join(document_tokens)
+        documents_processed.append(doc_str)
     
-    # convert from stem to tokens
-    query_expands = set()
-    for stem in query_expands_stem:
-        query_expands.update(list(stem_2_tokens[stem]))
+    # Create custom stop words list
+    custom_stop_words = ['button', 'bar', 'app', 'account', 'shop', 'main', 'about', 'skip', 'watch', 'link', 'file', 'upload', 'ref', 'edit', 'content', 'html', 'head', 'body', 'href', 'src', 'alt', 'header', 'footer', 'nav', 'menu', 'search', 'com']
 
-    # generate new query
-    for token in query:
-        query_expands.discard(token)
+    # Build TF-IDF Vectorizer
+    tfidf = TfidfVectorizer(stop_words=custom_stop_words)
+    tfidf_matrix = tfidf.fit_transform(documents_processed)
 
-    # update query with query expands 
-    expanded_query = list()
-    expanded_query.extend(query)
-    expanded_query.extend(list(query_expands))
-    query = expanded_query
+    # get the feature names
+    feature_names = tfidf.get_feature_names_out()
 
-    query = ' '.join(query)
-    print('Expanded query:', query)
+    # find co-occuring terms
+    cooccurring_terms = extract_cooccurring_terms(tfidf_matrix, feature_names, query_token)
 
-    return query
+    #(cooccurring_terms)
+
+    # Filter terms
+    filtered_terms = []
+
+    for term, count in cooccurring_terms.items():
+        if count > 1 and count < len(solr_results) and len(term) > 2:
+            filtered_terms.append(term)
+    
+   
+
+    feature_names = tfidf.get_feature_names_out()
+    tfidf_scores = tfidf.transform([query]).toarray()[0].tolist()
+    
+    ranked_terms = sorted(zip(feature_names, tfidf_scores), key=lambda x: (x[1], cooccurring_terms[x[0]]), reverse=True)
+    
+    # Rank and add terms
+    expanded_query = query
+
+    for term, _ in ranked_terms:
+        if term not in query.split():
+            expanded_query += " " + term
+            if len(expanded_query.split()) > 5:
+                break
+    
+    print("expanded query ==", expanded_query)
+
+    return expanded_query
+
