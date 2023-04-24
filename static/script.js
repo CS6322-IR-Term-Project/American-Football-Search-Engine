@@ -32,4 +32,8 @@ $(document).ready(function() {
         }
     });
 
+    $('#clear-icon').on('click', () => {
+      // Clear value of search input
+      $('#search-input').val('');
+    });
   });

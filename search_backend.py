@@ -11,6 +11,8 @@ from spellchecker import SpellChecker
 from operator import itemgetter
 from nltk.corpus import stopwords
 from nltk.tokenize import wordpunct_tokenize
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import pysolr
 
 app = Flask(__name__)
@@ -21,10 +23,12 @@ solr = pysolr.Solr('http://localhost:8983/solr/nutch', timeout=10)
 def home_page():
     google_results = []
     bing_results = []
+    selected_value = 'page-rank' # set selected query to page rank by default
 
     if request.method == 'POST':
         query = request.form['query']
         user_selection = request.form.get('selection')
+        selected_value = user_selection
 
         # results for custom search, google and bing
         custom_results = custom_search(query)
@@ -33,14 +37,14 @@ def home_page():
             custom_results = get_hits_results(custom_results)
 
         elif is_clustering(user_selection):
-            custom_results = get_clustering_results(custom_results, user_selection)
+            custom_results = get_clustering_results(query, custom_results, user_selection)
 
         elif is_query_expansion(user_selection):
-            custom_results = query_expansion(query, custom_results, user_selection)  
+            query, custom_results = query_expansion(query, custom_results, user_selection)  
                   
-        return render_template('index.html', custom_results = custom_results, google_results=google_results, bing_results=bing_results, query=query)
+        return render_template('index.html', custom_results = custom_results, google_results=google_results, bing_results=bing_results, query=query, selected_value=selected_value)
     
-    return render_template('index.html', google_results=google_results, bing_results=bing_results)
+    return render_template('index.html', google_results=google_results, bing_results=bing_results, selected_value=selected_value)
 
 def is_hits(user_selection):
     return user_selection == 'hits'
@@ -68,14 +72,23 @@ def apply_spell_check(query):
 def query_expansion(query, custom_results, selection):
     if selection == 'association-expansion':
         expanded_query = association_main(query, custom_results)
-        custom_results = custom_search(expanded_query)
+        custom_results = custom_search(query)
+        print(custom_results[0])
     elif selection == 'metric-expansion':
         expanded_query = metric_cluster_main(query, custom_results)
         custom_results = custom_search(expanded_query)
     elif selection == 'scalar-expansion':
-        pass
+        # Extract the relevant and non-relevant documents from the results
+        relevant_docs = [doc['content'][0] for doc in custom_results[:30]]   # Assume the top 5 documents are relevant
+        nonrelevant_docs = [doc['content'][0] for doc in custom_results[-30:]]   # Assume the last 5 documents are non-relevant
+        #expanded_query = rocchio(query.split(), relevant_docs, nonrelevant_docs)
+        expanded_query = metric_cluster_main(query, custom_results)
+        custom_results = custom_search(expanded_query)
+
+        #custom_results = custom_search(' '.join(expanded_query))
+        
     
-    return custom_results
+    return (expanded_query, custom_results)
 
 
 
@@ -109,7 +122,7 @@ def query_search(query):
     updated_query = ' '.join(tokenizer(query))
     results = None
 
-    while (results is None or len(results) == 0):
+    while (results is None or len(results) == 0 and len(updated_query) > 0):
         results = solr.search('text:' + f"\"{updated_query}\"", **{
             'fl': 'id, title, url, anchor, content, meta_info, digest',  # Select the fields to return
             'rows': 100
@@ -156,54 +169,53 @@ def tokenizer(query):
 
     return tokens
 
-def get_clustering_results(custom_results, user_selection):
-    if user_selection == 'flat-clustering':
-        f = open('clustering_f.txt')
-        lines = f.readlines()
-        f.close()
-    elif user_selection == 'hierarchical-clustering':
-        f = open('clustering_h8.txt')
-        lines = f.readlines()
-        f.close()
-
-    cluster_map = {}
-
-    for line in lines:
-        line_split = line.split(",")
-        if line_split[1] == "":
-            line_split[1] = "99"
-        cluster_map.update({line_split[0]: line_split[1]})
-
-    for curr_resp in custom_results:
-        url_collection = curr_resp["url"][0]
-        curr_cluster = cluster_map.get(url_collection, "99")
-        curr_resp.update({"cluster": curr_cluster})
-        curr_resp.update({"done": "False"})
-        
-
-    clust_resp = []
-    curr_rank = 1
-
-    for curr_resp in custom_results:
-        if curr_resp["done"] == "False":
-            curr_cluster = curr_resp["cluster"]
-            curr_resp.update({"done": "True"})
-            curr_resp.update({"rank": str(curr_rank)})
-            curr_rank += 1
-            clust_resp.append({"title": curr_resp["title"], "url": curr_resp["url"], "content": curr_resp["content"],
-                               "meta_info": curr_resp["meta_info"], "rank": curr_resp["rank"]})
-            for remaining_resp in custom_results:
-                if remaining_resp["done"] == "False":
-                    if remaining_resp["cluster"] == curr_cluster:
-                        remaining_resp.update({"done": "True"})
-                        remaining_resp.update({"rank": str(curr_rank)})
-                        curr_rank += 1
-                        clust_resp.append({"title": remaining_resp["title"], "url": remaining_resp["url"],
-                                           "content": remaining_resp["content"],
-                                           "meta_info": remaining_resp["meta_info"], "rank": remaining_resp["rank"]})
+def get_clustering_results(query, results, user_selection):
+    if (user_selection == 'flat-clustering'):
+        print("user selection is " + user_selection + " processing flat_clustering" )
+        return process_results(query, results, 'flat_clustering.txt')
     
-    return clust_resp
+    print("user selection is " + user_selection + " processing hierarchical_clustering" )
+    return process_results(query, results, 'hierarchical_clustering.txt')
+    
 
+def process_results(query, results, clusters_file):
+    # Parse the URL clusters from the text file
+    clusters = {}
+    with open(clusters_file, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            try:
+                url, value = line.split(',', maxsplit=1)
+                clusters[url] = float(value)
+            except ValueError:
+                pass
+    
+    # Extract the text from the query and results
+    texts = [query] + [result['content'][0] for result in results]
+    
+    # Create a bag-of-words representation of the texts
+    vectorizer = CountVectorizer()
+    vectors = vectorizer.fit_transform(texts)
+    
+    # Compute the cosine similarity between the query and each result
+    similarities = cosine_similarity(vectors[0:1], vectors[1:]).flatten()
+    
+    # Adjust the similarity scores based on the URL clusters
+    for i, result in enumerate(results):
+        url = result['url'][0]
+        if url in clusters:
+            cluster_value = clusters[url]
+            cluster_value = clusters[url]
+            similarities[i] *= cluster_value
+    
+    # Rank the results by their similarity to the query
+    ranked_results = sorted(results, key=lambda result: (similarities[results.index(result)], clusters.get(result['url'][0], 0)), reverse=True)
+    
+    
+    return ranked_results
+
+
+    
 
 
 if __name__ == '__main__':

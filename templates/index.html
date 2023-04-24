@@ -3,8 +3,8 @@
   <head>
     <title>Search Bar</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script async src="https://cse.google.com/cse.js?cx=746b90334649d4be8"></script>
-    <script src="https://kit.fontawesome.com/bb692ce394.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="title">
@@ -12,9 +12,9 @@
     </div>
     <form method="post">
         <div id="search-container">
-            <span class="search-icon"></span>
-            <input type="text" name="query" id="search-input">
-            <i class="fa fa-football" aria-hidden="true"></i>
+            <span class="search-icon"><i class="fa fa-search" ></i></span>
+            <input type="text" name="query" id="search-input" value="{{query}}">
+            <span class="clear-icon"><i class="fa fa-trash fa-lg" id="clear-icon"></i></span>
         </div>
         
         <div id="button-container">
@@ -25,9 +25,9 @@
           <fieldset>
             <label>
               Relevance Models
-              <input type="radio" id="page-rank" name="selection" value="page-rank" checked="checked">
+              <input type="radio" id="page-rank" name="selection" value="page-rank" {% if selected_value == 'page-rank' %}checked{% endif %}>
               <label for="page-rank">Page Rank</label>
-              <input type="radio" id="hits" name="selection" value="hits">
+              <input type="radio" id="hits" name="selection" value="hits" {% if selected_value == 'hits' %}checked{% endif %}>
               <label for="hits">HITS</label>
             </label>
           </fieldset>
@@ -35,9 +35,9 @@
           <fieldset id="clustering-container">
             <label>
               Clustering
-              <input type="radio" id="flat-clustering" name="selection" value="flat-clustering">
+              <input type="radio" id="flat-clustering" name="selection" value="flat-clustering" {% if selected_value == 'flat-clustering' %}checked{% endif %}>
               <label for="flat-clustering">Flat Clustering</label>
-              <input type="radio" id="hierarchical-clustering" name="selection" value="hierarchical-clustering">
+              <input type="radio" id="hierarchical-clustering" name="selection" value="hierarchical-clustering" {% if selected_value == 'hierarchical-clustering' %}checked{% endif %}>
               <label for="hierarchical-clustering">Hierarchical Clustering</label>
             </label>
           </fieldset>
@@ -45,11 +45,11 @@
           <fieldset id="query-expansion-container">
             <label>
               Query Expansion
-              <input type="radio" id="association-expansion" name="selection" value="association-expansion">
+              <input type="radio" id="association-expansion" name="selection" value="association-expansion" {% if selected_value == 'association-expansion' %}checked{% endif %}>
               <label for="association-expansion">Association Expansion</label>
-              <input type="radio" id="metric-expansion" name="selection" value="metric-expansion">
+              <input type="radio" id="metric-expansion" name="selection" value="metric-expansion" {% if selected_value == 'metric-expansion' %}checked{% endif %}>
               <label for="metric-expansion">Metric Expansion</label>
-              <input type="radio" id="scalar-expansion" name="selection" value="scalar-expansion">
+              <input type="radio" id="scalar-expansion" name="selection" value="scalar-expansion" {% if selected_value == 'scalar-expansion' %}checked{% endif %}>
              <label for="scalar-expansion">Scalar Expansion</label>
              </label>
           </fieldset>

@@ -4,7 +4,6 @@ from nltk import WordNetLemmatizer
 from tqdm import tqdm
 import string
 from collections import defaultdict, Counter
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def tokenizer(query):
@@ -53,6 +52,8 @@ def association_main(query, solr_results):
     # Create custom stop words list
     custom_stop_words = ['button', 'bar', 'app', 'account', 'shop', 'main', 'about', 'skip', 'watch', 'link', 'file', 'upload', 'ref', 'edit', 'content', 'html', 'head', 'body', 'href', 'src', 'alt', 'header', 'footer', 'nav', 'menu', 'search', 'com']
 
+    custom_stop_words.append(stopwords)
+
     # Build TF-IDF Vectorizer
     tfidf = TfidfVectorizer(stop_words=custom_stop_words)
     tfidf_matrix = tfidf.fit_transform(documents_processed)
@@ -63,8 +64,6 @@ def association_main(query, solr_results):
     # find co-occuring terms
     cooccurring_terms = extract_cooccurring_terms(tfidf_matrix, feature_names, query_token)
 
-    #(cooccurring_terms)
-
     # Filter terms
     filtered_terms = []
 
@@ -72,8 +71,6 @@ def association_main(query, solr_results):
         if count > 1 and count < len(solr_results) and len(term) > 2:
             filtered_terms.append(term)
     
-   
-
     feature_names = tfidf.get_feature_names_out()
     tfidf_scores = tfidf.transform([query]).toarray()[0].tolist()
     

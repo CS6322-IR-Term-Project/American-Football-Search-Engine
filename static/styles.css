@@ -52,6 +52,10 @@ html, body {
   position: relative;
 }
 
+.clear-icon:hover {
+  cursor: pointer;
+}
+
 /* Center the button container horizontally */
 #button-container {
   display: flex;
@@ -70,19 +74,19 @@ html, body {
   align-items: center;
 }
 
-/* Style the search icon container */
-.search-icon-container {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+.search-icon {
+  position: relative;
+  left: 30px;
+  transform: translateY(30%);
 }
 
-/* Style the search icon */
-.search-icon {
-  width: 1.5em;
-  height: 1.5em;
+.clear-icon {
+  position: relative;
+  right: 45px;
+  transform: translateY(30%);
 }
+
+
 /* Style the search button */
 #search-button {
   padding: 12px 20px;
