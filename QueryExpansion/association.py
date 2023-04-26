@@ -50,7 +50,7 @@ def association_main(query, solr_results):
         documents_processed.append(doc_str)
     
     # Create custom stop words list
-    custom_stop_words = ['button', 'bar', 'app', 'account', 'shop', 'main', 'about', 'skip', 'watch', 'link', 'file', 'upload', 'ref', 'edit', 'content', 'html', 'head', 'body', 'href', 'src', 'alt', 'header', 'footer', 'nav', 'menu', 'search', 'com']
+    custom_stop_words = ['Menu', 'menu', 'button', 'bar', 'app', 'account', 'shop', 'main', 'about', 'skip', 'watch', 'link', 'file', 'upload', 'ref', 'edit', 'content', 'html', 'head', 'body', 'href', 'src', 'alt', 'header', 'footer', 'nav', 'menu', 'search', 'com']
 
     custom_stop_words.append(stopwords)
 

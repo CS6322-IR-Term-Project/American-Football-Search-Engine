@@ -31,17 +31,6 @@
               <label for="hits">HITS</label>
             </label>
           </fieldset>
-          
-          <fieldset id="clustering-container">
-            <label>
-              Clustering
-              <input type="radio" id="flat-clustering" name="selection" value="flat-clustering" {% if selected_value == 'flat-clustering' %}checked{% endif %}>
-              <label for="flat-clustering">Flat Clustering</label>
-              <input type="radio" id="hierarchical-clustering" name="selection" value="hierarchical-clustering" {% if selected_value == 'hierarchical-clustering' %}checked{% endif %}>
-              <label for="hierarchical-clustering">Hierarchical Clustering</label>
-            </label>
-          </fieldset>
-        
           <fieldset id="query-expansion-container">
             <label>
               Query Expansion
@@ -53,6 +42,19 @@
              <label for="scalar-expansion">Scalar Expansion</label>
              </label>
           </fieldset>
+
+          <fieldset id="clustering-container">
+            <label>
+              Clustering
+              <input type="radio" id="flat-clustering" name="selection" value="flat-clustering" {% if selected_value == 'flat-clustering' %}checked{% endif %}>
+              <label for="flat-clustering">Flat Clustering</label>
+              <input type="radio" id="hierarchical-clustering-one" name="selection" value="hierarchical-clustering-one" {% if selected_value == 'hierarchical-clustering-one' %}checked{% endif %}>
+              <label for="hierarchical-clustering-one">Single Hierarchical Clustering</label>
+              <input type="radio" id="hierarchical-clustering-complete" name="selection" value="hierarchical-clustering-complete" {% if selected_value == 'hierarchical-clustering-complete' %}checked{% endif %}>
+              <label for="hierarchical-clustering-complete">Complete Hierarchical Clustering</label>
+            </label>
+          </fieldset>
+
       </div>
     </form>
 
